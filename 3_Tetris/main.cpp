@@ -39,20 +39,29 @@ struct Pos{
 struct Logo{
     std::vector<Pos> array;
     int maxX;
+    int maxY;
 };
 
-SDL_Color colorArray[8] = {
-    {255,0,0},
-    {0,255,0},
-    {0,0,255},
-    {255,255,0},
-    {255,0,255},
-    {0,255,255},
-    {0,255,255},
-    {0,255,255}
+SDL_Color colorArray[12] = {
+    {200,40,40},
+    {40,200,40},
+    {40,40,200},
+    
+    {200,200,40},
+    {200,40,200},
+    {40,200,200},
+    
+    {200,120,80},
+    {120,200,80},
+
+    {40,200,120},
+    {40,120,200},
+
+    {200,40,120},
+    {120,40,200},
 };
 
-Logo logoArray[8];
+Logo logoArray[12];
 
 bool isInCanvas(Logo logo,SDL_FRect rect,SDL_Rect canvas){
 
@@ -67,7 +76,7 @@ bool isInCanvas(Logo logo,SDL_FRect rect,SDL_Rect canvas){
 };
 
 bool isCollided(Logo logo,SDL_FRect rect,int isHolding);
-void makePiece();
+void GeneratePiece();
 struct Piece{
     SDL_FRect rect;
     Logo logo;
@@ -75,12 +84,19 @@ struct Piece{
 
     void rotate(){
         Logo tempLogo = logo;
+        int maxX,maxY;
+        maxX=maxY=0;
         for (int i=0;i!=logo.array.size();i++){
-            tempLogo.array[i] = {-tempLogo.array[i].y,tempLogo.array[i].x};            
+            tempLogo.array[i] = {-tempLogo.array[i].y,tempLogo.array[i].x};    
+
+            if (tempLogo.array[i].x>maxX) maxX = tempLogo.array[i].x;
+            if (tempLogo.array[i].y>maxY) maxY = tempLogo.array[i].y;                
         }
         if (isInCanvas(tempLogo,rect,gameGridRect) &&
             !isCollided(tempLogo,rect,1)){
             logo = tempLogo;
+            logo.maxX = maxX;
+            logo.maxY = maxY;
         }
     }
 
@@ -95,7 +111,7 @@ struct Piece{
             rect = tempRect;
         }else if(Dirc==DOWN){
             heldKeys[DOWN]=false;
-            makePiece();
+            GeneratePiece();
         }
 
     }
@@ -135,59 +151,175 @@ void initLogo(){
     logoArray[0].array.push_back({1,0});
     logoArray[0].array.push_back({1,1});
     logoArray[0].maxX = 1;
+    logoArray[0].maxY = 1;
 
     logoArray[1].array.push_back({0,0});
     logoArray[1].array.push_back({1,0});
     logoArray[1].array.push_back({2,0});
     logoArray[1].array.push_back({2,1});
     logoArray[1].maxX = 2;
+    logoArray[1].maxY = 1;
 
     logoArray[2].array.push_back({0,0});
     logoArray[2].array.push_back({1,0});
     logoArray[2].array.push_back({2,0});
-    logoArray[2].array.push_back({1,1});
+    logoArray[2].array.push_back({0,1});
     logoArray[2].maxX = 2;
+    logoArray[2].maxY = 1;
 
     logoArray[3].array.push_back({0,0});
     logoArray[3].array.push_back({1,0});
     logoArray[3].array.push_back({2,0});
-    logoArray[3].array.push_back({3,0});
-    logoArray[3].maxX = 3;
+    logoArray[3].array.push_back({1,1});
+    logoArray[3].maxX = 2;
+    logoArray[3].maxY = 1;
 
     logoArray[4].array.push_back({0,0});
-    logoArray[4].array.push_back({0,1});
     logoArray[4].array.push_back({1,0});
     logoArray[4].array.push_back({1,1});
-    logoArray[4].array.push_back({2,1});
-    logoArray[4].maxX = 2;
+    logoArray[4].maxX = 1;
+    logoArray[4].maxY = 1;
 
     logoArray[5].array.push_back({0,0});
     logoArray[5].array.push_back({1,0});
-    logoArray[5].array.push_back({2,0});
-    logoArray[5].array.push_back({0,1});
+    logoArray[5].array.push_back({1,1});
     logoArray[5].array.push_back({2,1});
     logoArray[5].maxX = 2;
+    logoArray[5].maxY = 1;
 
-    logoArray[6].array.push_back({0,0});
     logoArray[6].array.push_back({0,1});
     logoArray[6].array.push_back({1,1});
-    logoArray[6].maxX = 1;
+    logoArray[6].array.push_back({1,0});
+    logoArray[6].array.push_back({2,0});
+    logoArray[6].maxX = 2;
+    logoArray[6].maxY = 1;
 
     logoArray[7].array.push_back({0,0});
-    logoArray[7].array.push_back({0,1});
-    logoArray[7].array.push_back({1,1});
-    logoArray[7].array.push_back({1,2});
-    logoArray[7].maxX = 1;
+    logoArray[7].array.push_back({1,0});
+    logoArray[7].array.push_back({2,0});
+    logoArray[7].array.push_back({3,0});
+    logoArray[7].maxX = 3;
+    logoArray[7].maxY = 0;
 
+    logoArray[8].array.push_back({0,0});
+    logoArray[8].array.push_back({1,0});
+    logoArray[8].array.push_back({2,0});
+    logoArray[8].array.push_back({0,1});
+    logoArray[8].array.push_back({2,1});
+    logoArray[8].maxX = 2;
+    logoArray[8].maxY = 1;
+
+    logoArray[9].array.push_back({2,0});
+    logoArray[9].array.push_back({1,0});
+    logoArray[9].array.push_back({1,1});
+    logoArray[9].array.push_back({0,1});
+    logoArray[9].array.push_back({0,2});
+    logoArray[9].maxX = 2;
+    logoArray[9].maxY = 1;
+
+    logoArray[10].array.push_back({1,2});
+    logoArray[10].array.push_back({1,0});
+    logoArray[10].array.push_back({1,1});
+    logoArray[10].array.push_back({0,1});
+    logoArray[10].array.push_back({2,1});
+    logoArray[10].maxX = 2;
+    logoArray[10].maxY = 1;
+
+
+    
 
 };
 
-void makePiece(){
+bool isOccupied(Pos pos,bool ifRemove=false)
+{
+    for (int i=0;i!=pieceArray.size();i++){
+        for (int c=0;c!=pieceArray[i].logo.array.size();c++)
+        {
+            if ((pieceArray[i].logo.array[c].x + pieceArray[i].rect.x == pos.x)
+                &&
+                (pieceArray[i].logo.array[c].y + pieceArray[i].rect.y == pos.y))
+            {
+                if (ifRemove)
+                {
+                    pieceArray[i].logo.array.erase(
+                        pieceArray[i].logo.array.begin()+c);
+                }
 
+                return true;
+            }             
+        }
+    }
+    return false;
+}
+void FallPieces(int Limit){
+    
+    
+    for (int i=0;i!=pieceArray.size();i++){
+        for (int c=0;c!=pieceArray[i].logo.array.size();c++)
+        {
+            if ((pieceArray[i].logo.array[c].y + pieceArray[i].rect.y
+                < Limit+1)&&(pieceArray[i].logo.array[c].y + 
+                pieceArray[i].rect.y <gameGridRect.y+
+                gameGridRect.h - 1))
+            {
+                
+                pieceArray[i].logo.array[c].y++;
+            }
+        }    
+    }  
+     
+}
+
+void CleanRows(){
+    bool shouldRemove = false;
+    std::vector<int> cleanedRows;
+    for (int y=gameGridRect.y;y!=gameGridRect.y+gameGridRect.h;y++)
+    {
+    
+        for (int x=gameGridRect.x;x!=gameGridRect.x+gameGridRect.w;x++)
+        {
+            // out(x) space out(y) space out("| ")
+            if (!shouldRemove){
+                if (!isOccupied({x,y})){break;}
+            }else{
+                isOccupied({x,y},true);
+            }
+
+            if (x==gameGridRect.x+gameGridRect.w-1)
+            {
+                if (shouldRemove){
+                    
+                    cleanedRows.push_back(y);
+                }else{
+                    x = gameGridRect.x-1;
+                }
+
+                shouldRemove=true;
+            }
+        }
+        shouldRemove=false;
+
+    }
+
+    for (int i=0;i!=cleanedRows.size();i++)
+    {
+        FallPieces(cleanedRows[i]-1);
+    }
+    
+
+
+}
+
+
+void GeneratePiece(){
+
+
+    CleanRows();
     // out(pieceArray.size());
     int num;     
-    num = rand()%8;
+    num = rand()%11;
     //out(num) enter
+    
     
     SDL_FRect  r1 = {float((gameGridRect.x+gameGridRect.w+1)/2)
                             -logoArray[num].maxX/2
@@ -196,6 +328,8 @@ void makePiece(){
     if (!isCollided(logoArray[num],r1,0)){
         pieceArray.push_back({r1,logoArray[num],colorArray[num]});
     }
+
+    
 }
 
 
@@ -238,7 +372,7 @@ void Init(){
     gridXSize = float(winX) / gridX;
     gridYSize = float(winY) / gridY;
     
-    makePiece();
+    GeneratePiece();
 
     gameGridMask.x = gameGridRect.x * gridXSize;
     gameGridMask.y = gameGridRect.y * gridXSize;
@@ -267,7 +401,7 @@ void FetchEvents(){
             switch (event.key.keysym.sym){
 
                 case SDLK_UP:    if(heldKeys[UP]) heldKeys[UP] = false; break;
-                // case SDLK_DOWN:  if(heldKeys[DOWN])  heldKeys[DOWN] = false; break;
+                case SDLK_DOWN:  if(heldKeys[DOWN])  heldKeys[DOWN] = false; break;
                 case SDLK_RIGHT: if(heldKeys[RIGHT])  heldKeys[RIGHT] = false; break;
                 case SDLK_LEFT:  if(heldKeys[LEFT])  heldKeys[LEFT] = false; break;
                 // case SDLK_RETURN: if(heldKeys[ENTER]) heldKeys[ENTER] = false;break;
@@ -289,7 +423,7 @@ void CheckEvents(){
     }
 
     if (heldKeys[F1]){heldKeys[F1]=false; showGrid=!showGrid;}
-    // if (heldKeys[ENTER]){heldKeys[ENTER]=false;makePiece();}
+    // if (heldKeys[ENTER]){heldKeys[ENTER]=false;GeneratePiece();}
 
     if (heldKeys[UP])
     {heldKeys[UP]=false; pieceArray[pieceArray.size()-1].rotate();}
