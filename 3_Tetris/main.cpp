@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include <string>
 
 #define out(x) std::cout<<x;
 #define enter out('\n')
@@ -19,10 +20,19 @@ float gridYSize;
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 SDL_Event event;
+TTF_Font* gFont = NULL;
 
+std::string PayamText1 = "Score : ";
+std::string PayamText2[2] = {"Pieces : ","/ Balance : "};
+SDL_Texture* PayamTexture1;
+SDL_Rect PayamRect1;
+SDL_Texture* PayamTexture2;
+SDL_Rect PayamRect2;
+int Score = 1;
+int totalPieces = 0;
 bool shouldRun = true;
 bool showGrid = true;
-int tickSpeed = 300;
+int tickSpeed = 450;
 enum : unsigned char{
     UP,DOWN,
     RIGHT,LEFT,
@@ -46,11 +56,11 @@ SDL_Color colorArray[12] = {
     {200,40,40},
     {40,200,40},
     {40,40,200},
-    
+
     {200,200,40},
     {200,40,200},
     {40,200,200},
-    
+
     {200,120,80},
     {120,200,80},
 
@@ -69,7 +79,7 @@ bool isInCanvas(Logo logo,SDL_FRect rect,SDL_Rect canvas){
         if (logo.array[i].x + rect.x < canvas.x){return false;}
         if (logo.array[i].y + rect.y < canvas.y){return false;}
         if (logo.array[i].x + rect.x > canvas.x+canvas.w-1){return false;}
-        if (logo.array[i].y + rect.y > canvas.y+canvas.h-1){return false;}        
+        if (logo.array[i].y + rect.y > canvas.y+canvas.h-1){return false;}
     }
 
     return true;
@@ -87,10 +97,10 @@ struct Piece{
         int maxX,maxY;
         maxX=maxY=0;
         for (int i=0;i!=logo.array.size();i++){
-            tempLogo.array[i] = {-tempLogo.array[i].y,tempLogo.array[i].x};    
+            tempLogo.array[i] = {-tempLogo.array[i].y,tempLogo.array[i].x};
 
             if (tempLogo.array[i].x>maxX) maxX = tempLogo.array[i].x;
-            if (tempLogo.array[i].y>maxY) maxY = tempLogo.array[i].y;                
+            if (tempLogo.array[i].y>maxY) maxY = tempLogo.array[i].y;
         }
         if (isInCanvas(tempLogo,rect,gameGridRect) &&
             !isCollided(tempLogo,rect,1)){
@@ -121,14 +131,14 @@ std::vector<Piece> pieceArray;
 
 bool isCollided(Logo logo,SDL_FRect rect,int isHolding)
 {
-    
+
 
     for (int i=0;i!=logo.array.size();i++)
     {
         for (int c=0;c!=pieceArray.size()-isHolding;c++)
         {
            if (pieceArray.size()==0) break;
-           for (int j=0;j!=pieceArray[c].logo.array.size();j++)            
+           for (int j=0;j!=pieceArray[c].logo.array.size();j++)
            {
 
             if ((pieceArray[c].logo.array[j].x +
@@ -209,24 +219,21 @@ void initLogo(){
     logoArray[8].maxX = 2;
     logoArray[8].maxY = 1;
 
-    logoArray[9].array.push_back({2,0});
-    logoArray[9].array.push_back({1,0});
-    logoArray[9].array.push_back({1,1});
+    logoArray[9].array.push_back({0,0});
     logoArray[9].array.push_back({0,1});
-    logoArray[9].array.push_back({0,2});
+    
     logoArray[9].maxX = 2;
     logoArray[9].maxY = 1;
 
-    logoArray[10].array.push_back({1,2});
     logoArray[10].array.push_back({1,0});
-    logoArray[10].array.push_back({1,1});
-    logoArray[10].array.push_back({0,1});
-    logoArray[10].array.push_back({2,1});
+    logoArray[10].array.push_back({2,0});
+    logoArray[10].array.push_back({3,0});
+    
     logoArray[10].maxX = 2;
     logoArray[10].maxY = 1;
 
 
-    
+
 
 };
 
@@ -246,36 +253,37 @@ bool isOccupied(Pos pos,bool ifRemove=false)
                 }
 
                 return true;
-            }             
+            }
         }
     }
     return false;
 }
 void FallPieces(int Limit){
-    
-    
+
+
     for (int i=0;i!=pieceArray.size();i++){
         for (int c=0;c!=pieceArray[i].logo.array.size();c++)
         {
             if ((pieceArray[i].logo.array[c].y + pieceArray[i].rect.y
-                < Limit+1)&&(pieceArray[i].logo.array[c].y + 
+                < Limit+1)&&(pieceArray[i].logo.array[c].y +
                 pieceArray[i].rect.y <gameGridRect.y+
                 gameGridRect.h - 1))
             {
-                
+
                 pieceArray[i].logo.array[c].y++;
             }
-        }    
-    }  
-     
+        }
+    }
+
 }
 
+void PayamNegari();
 void CleanRows(){
     bool shouldRemove = false;
     std::vector<int> cleanedRows;
     for (int y=gameGridRect.y;y!=gameGridRect.y+gameGridRect.h;y++)
     {
-    
+
         for (int x=gameGridRect.x;x!=gameGridRect.x+gameGridRect.w;x++)
         {
             // out(x) space out(y) space out("| ")
@@ -288,7 +296,7 @@ void CleanRows(){
             if (x==gameGridRect.x+gameGridRect.w-1)
             {
                 if (shouldRemove){
-                    
+
                     cleanedRows.push_back(y);
                 }else{
                     x = gameGridRect.x-1;
@@ -301,35 +309,43 @@ void CleanRows(){
 
     }
 
+    float tempScore = 0.25;
     for (int i=0;i!=cleanedRows.size();i++)
     {
+        tempScore*=4;
         FallPieces(cleanedRows[i]-1);
     }
-    
 
-
+    if (cleanedRows.size()!=0){
+        
+        Score += tempScore;
+        PayamNegari();
+        
+    }
 }
 
 
 void GeneratePiece(){
-
+    
 
     CleanRows();
     // out(pieceArray.size());
-    int num;     
+    int num;
     num = rand()%11;
     //out(num) enter
-    
-    
+
+
     SDL_FRect  r1 = {float((gameGridRect.x+gameGridRect.w+1)/2)
                             -logoArray[num].maxX/2
                     ,float(gameGridRect.y),gridXSize,gridYSize};
-    
+
     if (!isCollided(logoArray[num],r1,0)){
         pieceArray.push_back({r1,logoArray[num],colorArray[num]});
+        totalPieces++;
+        PayamNegari();
     }
 
-    
+
 }
 
 
@@ -344,19 +360,45 @@ void piecesDraw(){
             mask.w = pieceArray[i].rect.w;
             mask.h = pieceArray[i].rect.h;
             // out(c) space out(mask.w) space out(mask.h) space
-            mask.x = pieceArray[i].rect.x * mask.w + 
+            mask.x = pieceArray[i].rect.x * mask.w +
             pieceArray[i].logo.array[c].x * mask.w;
-            mask.y = pieceArray[i].rect.y * mask.h + 
+            mask.y = pieceArray[i].rect.y * mask.h +
             pieceArray[i].logo.array[c].y * mask.h;
             // out(mask.x) space out(mask.y) enter
             setColor(pieceArray[i].color);
             SDL_RenderFillRectF(renderer,&mask);
-            
+
         }
 
     }
 }
 
+
+
+void PayamNegari(){
+
+    std::string tempStr1 = PayamText1 + std::to_string(Score); 
+        // std::string(" / Balance : ") + std::to_string(myRound(Score/float(totalPieces),2));
+    SDL_Surface* tempSurface1 = TTF_RenderText_Solid(gFont,tempStr1.c_str(),{0,0,0});
+    PayamTexture1 = SDL_CreateTextureFromSurface(renderer,tempSurface1);
+
+
+
+    PayamRect1.w = tempSurface1->w;
+    PayamRect1.h = tempSurface1->h;
+    PayamRect1.x = ((gameGridRect.x * gridXSize) + ((gameGridRect.w * gridXSize)/2)
+                                                        -PayamRect1.w/2);
+    // out(PayamRect1.x) enter out(winX) enter
+
+    SDL_FreeSurface(tempSurface1);
+
+
+}
+
+void DrawPayam(){
+    SDL_RenderCopy(renderer,PayamTexture1,NULL,&PayamRect1);
+
+}
 
 void Init(){
     TTF_Init();
@@ -367,13 +409,20 @@ void Init(){
 
     initLogo();
     srand(time(0));
-
-
+    gFont = TTF_OpenFont("./FreeSans.ttf",38);
+    if (gFont==NULL){
+        out("Error Opening Font : \n\t")
+        out(SDL_GetError()) enter
+    }
     gridXSize = float(winX) / gridX;
     gridYSize = float(winY) / gridY;
-    
+
     GeneratePiece();
 
+    PayamRect1.x = 0;
+    PayamRect1.y = 0;
+    PayamNegari();
+    
     gameGridMask.x = gameGridRect.x * gridXSize;
     gameGridMask.y = gameGridRect.y * gridXSize;
     gameGridMask.w = gameGridRect.w * gridXSize;
@@ -443,22 +492,25 @@ void DrawAndUpdate(){
 
     SDL_SetRenderDrawColor(renderer,40,40,40,255);
     SDL_RenderFillRectF(renderer,&gameGridMask);
-    
+
     piecesDraw();
 
     if (showGrid){
         SDL_SetRenderDrawColor(renderer,120,120,120,255);
 
-        
-        for (float i=1;i!=gridX;i++){
-            SDL_RenderDrawLineF(renderer,i*gridXSize,0,i*gridXSize,winY);
+
+        for (float i= gameGridRect.x;i!=gameGridRect.x + gameGridRect.w;i++){
+            SDL_RenderDrawLineF(renderer,i*gridXSize,gameGridRect.y*gridYSize,i*gridXSize,
+                (gameGridRect.y*gridYSize)+gameGridRect.h*gridYSize);
         }
-        for (float i=1;i!=gridY;i++){
-            SDL_RenderDrawLineF(renderer,0,i*gridYSize,winX,i*gridYSize);
+        for (float i=gameGridRect.y;i!=gameGridRect.y+gameGridRect.h;i++){
+            SDL_RenderDrawLineF(renderer,gameGridRect.x*gridXSize,i*gridYSize,
+            gameGridRect.x*gridXSize+gameGridRect.w*gridXSize
+            ,i*gridYSize);
         }
     }
 
-    
+    DrawPayam();
 
     SDL_RenderPresent(renderer);
     SDL_Delay(50);
