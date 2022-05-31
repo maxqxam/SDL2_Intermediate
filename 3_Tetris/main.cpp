@@ -8,8 +8,17 @@
 #define enter out('\n')
 #define space out(' ')
 
-int winX = 700;
-int winY = 700;
+
+
+
+
+
+
+
+int initWinX = 700;
+int initWinY = 700;
+int winX = initWinX;
+int winY = initWinY;
 int gridX = 25;
 int gridY = 25;
 SDL_Rect gameGridRect = {2,2,11,21};
@@ -21,6 +30,42 @@ SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 SDL_Event event;
 TTF_Font* gFont = NULL;
+
+
+void PiecesRedefine();
+void ToggleFullscreen(SDL_Window* Window) {
+    SDL_DisplayMode DM;
+    SDL_GetCurrentDisplayMode(0, &DM);
+    auto Width = DM.w;
+    auto Height = DM.h;
+
+    Uint32 FullscreenFlag = SDL_WINDOW_FULLSCREEN;
+    bool IsFullscreen = SDL_GetWindowFlags(Window) & FullscreenFlag;
+    if (IsFullscreen){
+        winX = initWinX;
+        winY = initWinY;
+    }else{
+        winX = DM.w;
+        winY = DM.h;
+    }
+
+    gridXSize = float(winX) / gridX;
+    gridYSize = float(winY) / gridY;
+    // SDL_RenderSetScale(renderer,winX,winY);
+
+
+    gameGridMask.x = gameGridRect.x * gridXSize;
+    gameGridMask.y = gameGridRect.y * gridYSize;
+    gameGridMask.w = gameGridRect.w * gridXSize;
+    gameGridMask.h = gameGridRect.h * gridYSize;
+
+    SDL_SetWindowFullscreen(Window, ~IsFullscreen);
+
+    SDL_DestroyRenderer(renderer);
+    renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+    PiecesRedefine();
+    // SDL_ShowCursor(IsFullscreen);
+}
 
 std::string PayamText1 = "Score : ";
 std::string PayamText2[2] = {"Pieces : ","/ Balance : "};
@@ -46,6 +91,7 @@ struct Pos{
     int y;
 };
 
+Pos MousePos = {0,0};
 struct Logo{
     std::vector<Pos> array;
     int maxX;
@@ -96,6 +142,7 @@ struct Piece{
         Logo tempLogo = logo;
         int maxX,maxY;
         maxX=maxY=0;
+        
         for (int i=0;i!=logo.array.size();i++){
             tempLogo.array[i] = {-tempLogo.array[i].y,tempLogo.array[i].x};
 
@@ -137,6 +184,7 @@ bool isCollided(Logo logo,SDL_FRect rect,int isHolding)
     {
         for (int c=0;c!=pieceArray.size()-isHolding;c++)
         {
+
            if (pieceArray.size()==0) break;
            for (int j=0;j!=pieceArray[c].logo.array.size();j++)
            {
@@ -221,14 +269,14 @@ void initLogo(){
 
     logoArray[9].array.push_back({0,0});
     logoArray[9].array.push_back({0,1});
-    
+
     logoArray[9].maxX = 2;
     logoArray[9].maxY = 1;
 
     logoArray[10].array.push_back({1,0});
     logoArray[10].array.push_back({2,0});
     logoArray[10].array.push_back({3,0});
-    
+
     logoArray[10].maxX = 2;
     logoArray[10].maxY = 1;
 
@@ -317,16 +365,16 @@ void CleanRows(){
     }
 
     if (cleanedRows.size()!=0){
-        
+
         Score += tempScore;
         PayamNegari();
-        
+
     }
 }
 
 
 void GeneratePiece(){
-    
+
 
     CleanRows();
     // out(pieceArray.size());
@@ -335,8 +383,7 @@ void GeneratePiece(){
     //out(num) enter
 
 
-    SDL_FRect  r1 = {float((gameGridRect.x+gameGridRect.w+1)/2)
-                            -logoArray[num].maxX/2
+    SDL_FRect  r1 = {float(gameGridRect.x+4)
                     ,float(gameGridRect.y),gridXSize,gridYSize};
 
     if (!isCollided(logoArray[num],r1,0)){
@@ -353,6 +400,13 @@ void setColor(SDL_Color cr){
     SDL_SetRenderDrawColor(renderer,cr.r,cr.g,cr.b,255);
 }
 
+void PiecesRedefine(){
+    for (int i=0;i!=pieceArray.size();i++){
+        pieceArray[i].rect.w = gridXSize;
+        pieceArray[i].rect.h = gridYSize; 
+    }
+
+}
 void piecesDraw(){
     SDL_FRect mask={0,0,0,0};
     for (int i=0;i!=pieceArray.size();i++){
@@ -377,7 +431,7 @@ void piecesDraw(){
 
 void PayamNegari(){
 
-    std::string tempStr1 = PayamText1 + std::to_string(Score); 
+    std::string tempStr1 = PayamText1 + std::to_string(Score);
         // std::string(" / Balance : ") + std::to_string(myRound(Score/float(totalPieces),2));
     SDL_Surface* tempSurface1 = TTF_RenderText_Solid(gFont,tempStr1.c_str(),{0,0,0});
     PayamTexture1 = SDL_CreateTextureFromSurface(renderer,tempSurface1);
@@ -422,17 +476,20 @@ void Init(){
     PayamRect1.x = 0;
     PayamRect1.y = 0;
     PayamNegari();
-    
+
     gameGridMask.x = gameGridRect.x * gridXSize;
-    gameGridMask.y = gameGridRect.y * gridXSize;
+    gameGridMask.y = gameGridRect.y * gridYSize;
     gameGridMask.w = gameGridRect.w * gridXSize;
-    gameGridMask.h = gameGridRect.h * gridXSize;
+    gameGridMask.h = gameGridRect.h * gridYSize;
 };
 
 void FetchEvents(){
     while (SDL_PollEvent(&event)!=0){
         if (event.type==SDL_QUIT){
             shouldRun = false;
+        }else if(event.type==SDL_MOUSEMOTION){
+         SDL_GetMouseState(&MousePos.x,&MousePos.y);
+         PayamNegari();
         }else if(event.type==SDL_KEYDOWN){
 
             switch (event.key.keysym.sym){
@@ -441,7 +498,7 @@ void FetchEvents(){
                 case SDLK_DOWN: heldKeys[DOWN] = true; break;
                 case SDLK_RIGHT: heldKeys[RIGHT] = true; break;
                 case SDLK_LEFT: heldKeys[LEFT] = true; break;
-                // case SDLK_RETURN: heldKeys[ENTER] = true; break;
+                case SDLK_RETURN: heldKeys[ENTER] = true; break;
                 case SDLK_F1: heldKeys[F1] = true; break;
             }
         }
@@ -453,7 +510,7 @@ void FetchEvents(){
                 case SDLK_DOWN:  if(heldKeys[DOWN])  heldKeys[DOWN] = false; break;
                 case SDLK_RIGHT: if(heldKeys[RIGHT])  heldKeys[RIGHT] = false; break;
                 case SDLK_LEFT:  if(heldKeys[LEFT])  heldKeys[LEFT] = false; break;
-                // case SDLK_RETURN: if(heldKeys[ENTER]) heldKeys[ENTER] = false;break;
+                case SDLK_RETURN: if(heldKeys[ENTER]) heldKeys[ENTER] = false;break;
                 case SDLK_F1:    if(heldKeys[F1])  heldKeys[F1] = false; break;
             }
         }
@@ -472,7 +529,7 @@ void CheckEvents(){
     }
 
     if (heldKeys[F1]){heldKeys[F1]=false; showGrid=!showGrid;}
-    // if (heldKeys[ENTER]){heldKeys[ENTER]=false;GeneratePiece();}
+    if (heldKeys[ENTER]){heldKeys[ENTER]=false;ToggleFullscreen(window);}
 
     if (heldKeys[UP])
     {heldKeys[UP]=false; pieceArray[pieceArray.size()-1].rotate();}
@@ -493,19 +550,33 @@ void DrawAndUpdate(){
     SDL_SetRenderDrawColor(renderer,40,40,40,255);
     SDL_RenderFillRectF(renderer,&gameGridMask);
 
-    piecesDraw();
+    SDL_SetRenderDrawColor(renderer,0,200,0,255);
 
+    SDL_FRect mouseRect = {MousePos.x-15,MousePos.y-15,30,30};
+    SDL_RenderFillRectF(renderer,&mouseRect);
+
+    piecesDraw();
     if (showGrid){
         SDL_SetRenderDrawColor(renderer,120,120,120,255);
 
 
-        for (float i= gameGridRect.x;i!=gameGridRect.x + gameGridRect.w;i++){
-            SDL_RenderDrawLineF(renderer,i*gridXSize,gameGridRect.y*gridYSize,i*gridXSize,
-                (gameGridRect.y*gridYSize)+gameGridRect.h*gridYSize);
+        // for (float i= gameGridRect.x;i!=gameGridRect.x + gameGridRect.w;i++){
+        //     SDL_RenderDrawLineF(renderer,i*gridXSize,gameGridRect.y*gridYSize,i*gridXSize,
+        //         (gameGridRect.y*gridYSize)+gameGridRect.h*gridYSize);
+        // }
+        // for (float i=gameGridRect.y;i!=gameGridRect.y+gameGridRect.h;i++){
+        //     SDL_RenderDrawLineF(renderer,gameGridRect.x*gridXSize,i*gridYSize,
+        //     gameGridRect.x*gridXSize+gameGridRect.w*gridXSize
+        //     ,i*gridYSize);
+        // }
+
+        for (float i= 0;i!=gridX;i++){
+            SDL_RenderDrawLineF(renderer,i*gridXSize,0,i*gridXSize,
+                winY);
         }
-        for (float i=gameGridRect.y;i!=gameGridRect.y+gameGridRect.h;i++){
-            SDL_RenderDrawLineF(renderer,gameGridRect.x*gridXSize,i*gridYSize,
-            gameGridRect.x*gridXSize+gameGridRect.w*gridXSize
+        for (float i=0 ;i!=gridY;i++){
+            SDL_RenderDrawLineF(renderer,0,i*gridYSize,
+            winX
             ,i*gridYSize);
         }
     }
