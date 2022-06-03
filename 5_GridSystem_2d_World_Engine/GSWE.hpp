@@ -3,6 +3,18 @@
 #include "MyWindow.hpp"
 
 namespace GSWE{
+    
+    float getPercent(float All,float Part){
+        float mask;
+        // std::cout<<All<<' '<<Part<<'\n';
+        float A = 100.0/All;
+        // std::cout<<A <<'\n';
+        
+        mask = float(Part*A);
+        return mask;
+    };
+
+
     struct Pos{
         int x;
         int y;
@@ -37,6 +49,10 @@ namespace GSWE{
 
         float gridXGap;
         float gridYGap;
+        float cameraZoom;
+        float cameraXRel = 50; // Must be between 0-100
+        float cameraYRel = 50; // Must be between 0-100
+        Pos cameraGridRel;
 
         bool showGrid = true;
         bool showTiles = true;
@@ -67,6 +83,8 @@ namespace GSWE{
         
         gridXGap = float(windowWidth)/gridWidth;
         gridYGap = float(windowHeight)/gridHeight;
+        cameraGridRel = {0,0};
+        cameraZoom = 1.0;
     }
 
     void GridSystem::Update(
@@ -97,10 +115,12 @@ namespace GSWE{
             for (int i=0;i!=mapTilesArray.size();i++)
             {
                 maskRect = {
-                    float(mapTilesArray[i].pos.x)*gridXGap,
-                    float(mapTilesArray[i].pos.y)*gridYGap,
-                    gridXGap,
-                    gridYGap
+                    (float(mapTilesArray[i].pos.x+cameraGridRel.x)*
+                        (gridXGap*cameraZoom))+gridXGap*cameraXRel/100,
+                    (float(mapTilesArray[i].pos.y+cameraGridRel.y)*
+                        (gridYGap*cameraZoom))+gridXGap*cameraYRel/100,
+                    gridXGap*cameraZoom,
+                    gridYGap*cameraZoom
                 };
 
                 SDL_RenderCopyF(p_renderer,
@@ -120,24 +140,32 @@ namespace GSWE{
                 gridColor.b,
                 gridColor.a
             );
-            
-            for (float i=0;i!=gridWidth;i++)
+            int tempZoom = (1/tempZoom);
+
+            if (tempZoom<1) tempZoom=1;
+            for (int x=0;
+                 x*gridXGap*cameraZoom < windowWidth*tempZoom;
+                 x++)
             {
                 SDL_RenderDrawLineF(p_renderer,
-                        0.0,
-                        i*gridYGap,
-                        windowWidth,
-                        i*gridYGap);
+                    x*gridXGap*cameraZoom,
+                    0,
+                    x*gridXGap*cameraZoom,
+                    windowHeight*tempZoom);
             }
 
-            for (float i=0;i!=gridHeight;i++)
+            for (int y=0;
+                 y*gridYGap*cameraZoom < windowHeight*tempZoom;
+                 y++)
             {
                 SDL_RenderDrawLineF(p_renderer,
-                        i*gridXGap,
-                        0.0,
-                        i*gridXGap,
-                        windowHeight);
+                    0,
+                    y*gridYGap*cameraZoom,
+                    windowWidth*tempZoom,
+                    y*gridYGap*cameraZoom);
             }
+            
+            
         }
     }
 
