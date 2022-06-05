@@ -215,9 +215,9 @@ void CheckEvents(){
         mainWindow.sizeChanged=false;
     }
     if (heldKeys[RIGHT]){PlayerMove(RIGHT,10); }
-    if (heldKeys[LEFT]){PlayerMove(LEFT,10);}
-    if (heldKeys[UP]){PlayerMove(UP,10);}
-    if (heldKeys[DOWN]){PlayerMove(DOWN,10);}
+    if (heldKeys[LEFT] ){PlayerMove(LEFT,10);}
+    if (heldKeys[UP])   {PlayerMove(UP,10);}
+    if (heldKeys[DOWN]) {PlayerMove(DOWN,10);}
     
     if (heldKeys[SIX]){mainGrid.cameraZoom*=1.01; 
     mainGrid.SetZoomFocus(GSWE::DynamicTilesArray[0].pos,
