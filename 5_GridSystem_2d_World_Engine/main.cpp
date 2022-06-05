@@ -10,8 +10,20 @@ int randint(int a,int b){
 MyWindow::Window mainWindow;
 GSWE::GridSystem mainGrid;
 
+void Log(){
+
+};
+
+enum{
+    UP,DOWN,
+    RIGHT,LEFT,
+    SIX,SEVEN
+};
+
+bool heldKeys[6] = {0,0,0,0,0,0};
+
 void GenerateChunk(){//Simple Chunk
-    GSWE::mapTilesArray.clear();
+    GSWE::StaticTilesArray.clear();
     int index = 0;
     
     int maxWidth =  randint(mainGrid.gridWidth/3,
@@ -27,16 +39,16 @@ void GenerateChunk(){//Simple Chunk
     for (int i=0;i!=maxWidth;i++)
     {
         for (int c=-1;c!=maxHeight;c++){
-            if (c==-1){index=randint(4,7);}
+            if (c==-1){index=randint(4,6);}
             else if (c==0){index=randint(0,1);}
             else if (c>0){index=randint(2,3);}
 
             // std::cout<<index<<' '<<i<<' '<<c<<' '<<'\n';
-            if (c==-1){if (randint(1,10)!=1) ifDo=false;}
+            if (c==-1){if (randint(1,5)!=1) ifDo=false;}
             if (c>0){if (randint(1,10-c)==1) break;}
             
             if (ifDo){
-                GSWE::mapTilesArray.push_back({GSWE::Pos({i+x,c+y}),index});
+                GSWE::StaticTilesArray.push_back({GSWE::Pos({i+x,c+y}),index});
             }
             ifDo = true;
         }
@@ -66,7 +78,33 @@ SDL_Texture* loadTexture(SDL_Renderer* p_renderer,
     return newTexture;
 }
 
+void PlayerMove(int p_dirc,int p_speed){
 
+    switch (p_dirc)
+    {
+        case UP: 
+        GSWE::DynamicTilesArray[0].YRel-=p_speed;
+        mainGrid.cameraYRel+=p_speed;
+        mainGrid.RelToGridRel(); break;
+
+        case DOWN:
+        GSWE::DynamicTilesArray[0].YRel+=p_speed;    
+        mainGrid.cameraYRel-=p_speed;
+        mainGrid.RelToGridRel(); break;
+
+        case RIGHT:
+        GSWE::DynamicTilesArray[0].XRel+=p_speed;
+        mainGrid.cameraXRel-=p_speed;
+        mainGrid.RelToGridRel(); break;
+        case LEFT: GSWE::DynamicTilesArray[0].XRel-=p_speed;
+        mainGrid.cameraXRel+=p_speed;
+        mainGrid.RelToGridRel(); break;
+    }
+    GSWE::DynamicTilesArray[0].RelToPos(); 
+    // mainGrid.SetZoomFocus(GSWE::DynamicTilesArray[0].pos,
+    //         GSWE::DynamicTilesArray[0].XRel,
+    //         GSWE::DynamicTilesArray[0].YRel);
+}
 
 bool shouldRun = true;
 SDL_Event event;
@@ -78,38 +116,48 @@ void Init(){
     mainWindow.Init("I Love OOP",1000,750);
     mainGrid.Init(1000,750,30,30); 
     std::srand(time(0));
-
+    
 
     SDL_Texture* tempTexture;
     int tempWidth;
     int tempHeight;
-    GSWE::Tile tempTile;
+    GSWE::Image tempImage;
+
     std::string paths[] = {
         "/home/yolo/Workstation/Graphies/Tiles/oimages/dirt0.png",
         "/home/yolo/Workstation/Graphies/Tiles/oimages/dirt1.png",
         "/home/yolo/Workstation/Graphies/Tiles/oimages/dirt2.png",
+
         "/home/yolo/Workstation/Graphies/Tiles/oimages/dirt3.png",
         "/home/yolo/Workstation/Graphies/Tiles/oimages/flower0.png",
         "/home/yolo/Workstation/Graphies/Tiles/oimages/flower1.png",
+
         "/home/yolo/Workstation/Graphies/Tiles/oimages/fire0.png",
+        "/home/yolo/Workstation/Graphies/Tiles/oimages/bee0.png",
+        "/home/yolo/Workstation/Graphies/Tiles/oimages/bee1.png",
+
+        "/home/yolo/Workstation/Graphies/Tiles/oimages/bee2.png",
+        "/home/yolo/Workstation/Graphies/Tiles/oimages/bee3.png",
         
     };
 
-    for (int i=0;i!=7;i++){
+    for (int i=0;i!=11;i++){
         tempTexture = loadTexture(mainWindow.renderer,
                         paths[i].c_str(),
                         tempWidth,tempHeight);
         
-        tempTile = {tempTexture,tempWidth,tempHeight};
+        tempImage = {tempTexture,tempWidth,tempHeight};
 
-        GSWE::tileArray.push_back(tempTile);
+        GSWE::imageArray.push_back(tempImage);
 
     }
+
+    GSWE::DynamicTilesArray.push_back({GSWE::Pos({0,0}),7});
 
     GenerateChunk();
     // for (int i=0;i!=mainGrid.gridWidth;i++)
     // {
-    //     GSWE::mapTilesArray.push_back({{i,0},0});
+    //     GSWE::StaticTilesArray.push_back({{i,0},0});
     // }
 
 }
@@ -120,6 +168,7 @@ void FetchEvents(){
         switch (event.type)
         {
             case (SDL_KEYDOWN):
+
                 switch (event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE: shouldRun = false; break;
@@ -131,17 +180,26 @@ void FetchEvents(){
                     case SDLK_3: mainGrid.cameraZoom=0.25; break;
                     case SDLK_4: mainGrid.cameraZoom=2; break;
                     case SDLK_5: mainGrid.cameraZoom=3; break;
-                    case SDLK_6: mainGrid.cameraZoom*=1.01; break;
-                    case SDLK_7: mainGrid.cameraZoom*=0.99; break;
+                    case SDLK_6: heldKeys[SIX]=true; break;
+                    case SDLK_7: heldKeys[SEVEN]=true; break;
                     
-                    case SDLK_RIGHT: mainGrid.cameraGridRel.x-=1; break;
-                    case SDLK_LEFT:  mainGrid.cameraGridRel.x+=1; break;
-                    case SDLK_DOWN: mainGrid.cameraGridRel.y-=1; break;
-                    case SDLK_UP: mainGrid.cameraGridRel.y+=1; break;
-                    
-                }
+                    case SDLK_RIGHT:heldKeys[RIGHT]=true;break;
+                    case SDLK_LEFT:heldKeys[LEFT]=true;break;
+                    case SDLK_DOWN:heldKeys[DOWN]=true;break;
+                    case SDLK_UP:heldKeys[UP]=true;break;
+                }break;
 
-            case (SDL_WINDOWEVENT):             
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym){
+                    case SDLK_UP:if(heldKeys[UP])heldKeys[UP]=false; break;
+                    case SDLK_DOWN:if(heldKeys[DOWN])heldKeys[DOWN]=false; break;
+                    case SDLK_RIGHT:if(heldKeys[RIGHT])heldKeys[RIGHT]=false; break;
+                    case SDLK_LEFT:if(heldKeys[LEFT])heldKeys[LEFT]=false; break;
+                    case SDLK_6:if(heldKeys[SIX])heldKeys[SIX]=false; break;
+                    case SDLK_7:if(heldKeys[SEVEN])heldKeys[SEVEN]=false; break;
+                }break;
+
+            case SDL_WINDOWEVENT:             
                 mainWindow.FetchWindowEvent(event);
                 break;       
         }
@@ -156,6 +214,35 @@ void CheckEvents(){
         mainGrid.Update( mainWindow.width,mainWindow.height);
         mainWindow.sizeChanged=false;
     }
+    if (heldKeys[RIGHT]){PlayerMove(RIGHT,10); }
+    if (heldKeys[LEFT]){PlayerMove(LEFT,10);}
+    if (heldKeys[UP]){PlayerMove(UP,10);}
+    if (heldKeys[DOWN]){PlayerMove(DOWN,10);}
+    
+    if (heldKeys[SIX]){mainGrid.cameraZoom*=1.01; 
+    mainGrid.SetZoomFocus(GSWE::DynamicTilesArray[0].pos,
+            GSWE::DynamicTilesArray[0].XRel,
+            GSWE::DynamicTilesArray[0].YRel);}
+
+    if (heldKeys[SEVEN]){mainGrid.cameraZoom*=0.99; 
+    mainGrid.SetZoomFocus(GSWE::DynamicTilesArray[0].pos,
+                GSWE::DynamicTilesArray[0].XRel,
+                GSWE::DynamicTilesArray[0].YRel);}
+
+    std::string strMask = "";
+    bool shouldPrint = false;
+    for (int i=0;i!=6;i++){
+        strMask+=std::to_string(heldKeys[i])+' ';
+        if (heldKeys[i]){
+            shouldPrint=true;
+        }     
+        if ((i==6)&&shouldPrint){
+            std::cout<<strMask<<'\n';
+            strMask="";
+            shouldPrint=false;
+        }
+    }
+
 }
 
 void DrawAndUpdate(){
@@ -171,6 +258,7 @@ int main(){
         FetchEvents();
         CheckEvents();
         DrawAndUpdate();
+        SDL_Delay(50);
     }
 
     return 0;
