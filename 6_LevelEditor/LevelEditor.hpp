@@ -2,7 +2,9 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include <fstream>
 #include "GSWE.hpp"
+
 #pragma once
 
 namespace LE{
@@ -36,7 +38,7 @@ namespace LE{
         void Draw(SDL_Renderer*);
         void CheckClick(int,int);
         void Save(std::string);
-        
+        void Load(std::string);
 
     };
 
@@ -127,8 +129,68 @@ namespace LE{
             
         }
     }
+    void LevelEditor::Load(std::string p_path){
+        std::ifstream inputFile(p_path);
+
+        int posx  = 0;
+        int posy  = 0;
+        int index = 0;
+        
+        int counter = 0;
+        std::string text="";
+        std::string tempString = "";
+        int totalLines = 0;
+        while (std::getline(inputFile,text))
+        {
+            totalLines ++;
+            for (int i=0;i!=text.length();i++){
+                if (text[i]=='-'){
+                    if (counter==0){
+                        index = std::stoi(tempString);
+                    }else if(counter==1){
+                        posx = std::stoi(tempString);
+                    }
+                    counter++;
+                    tempString="";
+                }else{
+                    tempString+=text[i];
+                }
+            }
+            posy=std::stoi(tempString);
+            // myout(text) indent
+            // myout(index) space
+            // myout(posx) space 
+            // myout(posy) enter 
+
+            GSWE::StaticTilesArray.push_back({{posx,posy},index});
+            counter = 0;
+            tempString = "";
+        }
+
+        myout(totalLines) myout(" Loaded from ")
+        myout(p_path) enter
+    }
+
+
     void LevelEditor::Save(std::string p_path)
     {
+        std::ofstream outputFile(p_path);
 
+        std::string maskString = "";
+        for (int i=0;i!=GSWE::StaticTilesArray.size();i++){
+            maskString = std::to_string(GSWE::StaticTilesArray[i].imageIndex) +
+                        "-"+
+                       std::to_string(GSWE::StaticTilesArray[i].pos.x) +
+                       "-"+
+                       std::to_string(
+                           GSWE::StaticTilesArray[i].pos.y);
+
+            outputFile << (maskString+"\n");
+            maskString = "";
+                       
+        }
+
+        outputFile.close();
+             
     }
 };

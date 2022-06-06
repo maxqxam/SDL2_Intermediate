@@ -34,6 +34,7 @@ SDL_Event event;
 bool shouldRun = true;
 bool shouldCreate = false;
 bool shouldDestroy = false;
+bool shouldBypass  = false;
 MyWindow::Window editorWindow;
 MyWindow::Window mainWindow;
 LE::LevelEditor  levelEditor;
@@ -100,7 +101,7 @@ std::string imagesPath[] = {
 
 enum{
     UP,DOWN,RIGHT,LEFT,
-    RSHIFT,RCTRL,
+    RSHIFT,RCTRL
 };
 
 bool heldKeys[6];
@@ -115,7 +116,7 @@ void Init(){
     mainGrid.Init(1000,750,25,20);
 
     editorWindow.Init("LevelEditor",800,600);
-    levelEditor.Init(800,600,10,10);
+    levelEditor.Init(800,600,8,8);
     SDL_SetRenderDrawBlendMode(editorWindow.renderer,
     SDL_BLENDMODE_BLEND);
 
@@ -142,6 +143,8 @@ void Init(){
         GSWE::imageArray.push_back(tempMainImage);
 
     }
+
+    levelEditor.Load("level.data");
 }
 
 void FetchEvents(){
@@ -156,7 +159,8 @@ void FetchEvents(){
         {
             switch (event.key.keysym.sym)
             {
-                
+                case SDLK_LSHIFT: if(!shouldBypass
+                                )shouldBypass=true;break;                               
                 case SDLK_UP: if(!heldKeys[UP]) heldKeys[UP]=true;break;
                 case SDLK_DOWN: if(!heldKeys[DOWN]) heldKeys[DOWN]=true;break;
                 case SDLK_RIGHT: if(!heldKeys[RIGHT]) heldKeys[RIGHT]=true;break;
@@ -169,6 +173,7 @@ void FetchEvents(){
         {
             switch (event.key.keysym.sym)
             {
+                case SDLK_LSHIFT: if(shouldBypass)shouldBypass=false;break;
                 case SDLK_F1: mainGrid.showGrid=!mainGrid.showGrid;break;
                 case SDLK_ESCAPE: shouldRun=false; break;
                 case SDLK_UP: if(heldKeys[UP]) heldKeys[UP]=0;break;
@@ -281,14 +286,20 @@ void CheckEvents(){
             }
         }
 
-        if (shouldInsert)
+        if (shouldInsert || shouldBypass)
         {           
-
-            out("Image number  ") 
-            out(levelEditor.selected)
-            out(" Inserted at : ")
-            out(mainGrid.mouseGridX) space
-            out(mainGrid.mouseGridY) enter 
+            if (!shouldInsert&&shouldBypass){
+                myout("Bypassed duplicate insertion | ")
+                shouldBypass=false;
+            }
+            myout("Image number  ") 
+            myout(levelEditor.selected)
+            myout(" Inserted at : ")
+            myout(mainGrid.mouseGridX) space
+            myout(mainGrid.mouseGridY) space 
+            myout(" | Total Tiles: ")
+            myout(GSWE::StaticTilesArray.size())
+            enter 
 
             GSWE::StaticTilesArray.push_back({
                 {mainGrid.mouseGridX,mainGrid.mouseGridY},
@@ -303,15 +314,18 @@ void CheckEvents(){
                 (GSWE::StaticTilesArray[i].pos.y==mainGrid.mouseGridY))
             {
 
-                out("Image number ")
-                out(GSWE::StaticTilesArray[i].imageIndex)
-                out(" Removed from : ")
-                out(GSWE::StaticTilesArray[i].pos.x) space 
-                out(GSWE::StaticTilesArray[i].pos.y)
+                myout("Image number ")
+                myout(GSWE::StaticTilesArray[i].imageIndex)
+                myout(" Removed from : ")
+                myout(GSWE::StaticTilesArray[i].pos.x) space 
+                myout(GSWE::StaticTilesArray[i].pos.y) space
+                myout(" | Total Tiles: ")
+                myout(GSWE::StaticTilesArray.size()) 
                 enter
 
                 GSWE::StaticTilesArray.erase(GSWE::StaticTilesArray.begin()
                                 + i);
+                
                 break;
             }
         }
@@ -337,6 +351,10 @@ int main(){
         CheckEvents();
         DrawAndUpdate();
         SDL_Delay(50);
+        if (!shouldRun){
+            myout("exiting...\n");
+            levelEditor.Save("level.data");
+        }
     }
 
     return 0;

@@ -3,10 +3,10 @@
 #include <vector>
 #include "MyWindow.hpp"
 
-#define out(x) std::cout<<x;
-#define space out(' ')
-#define enter out('\n')
-#define indent out('\t')
+#define myout(x) std::cout<<x;
+#define space myout(' ')
+#define enter myout('\n')
+#define indent myout('\t')
 
 namespace GSWE{
 
