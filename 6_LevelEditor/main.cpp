@@ -6,6 +6,7 @@
 #include "MyWindow.hpp"
 #include "LevelEditor.hpp"
 
+std::string saveToPath = "./data/level.data";
 SDL_Texture* loadTexture(SDL_Renderer* p_renderer,
                 std::string path,int &p_width,
                                  int &p_height){
@@ -44,59 +45,33 @@ std::string imagesAddress =
 "/home/yolo/Workstation/Graphies/Tiles/Adventure-Game-Jam/";
 
 std::string imagesPath[] = {
-    imagesAddress+"Tiles/floor0.png",
-    imagesAddress+"Tiles/floor1.png",
-    imagesAddress+"Tiles/floor2.png",
-    imagesAddress+"Tiles/floor3.png",
+    imagesAddress+"/Tiles1/stone-mass0.png",
 
-    imagesAddress+"Tiles/floor4.png",
-    imagesAddress+"Tiles/floor5.png",
-    imagesAddress+"Tiles/floor6.png",
-    imagesAddress+"Tiles/floor7.png",
-
-    imagesAddress+"Tiles/floor8.png",
-    imagesAddress+"Tiles/floor9.png",
-    imagesAddress+"Tiles/floor10.png",
-    imagesAddress+"Tiles/floor11.png",
-
-    imagesAddress+"Tiles/wall0.png",
-    imagesAddress+"Tiles/wall1.png",
-    imagesAddress+"Tiles/wall2.png",
-    imagesAddress+"Tiles/wall3.png",
-
-    //-----------------------------
-
-
-    imagesAddress+"Tiles/wall4.png",
-    imagesAddress+"Tiles/wall5.png",
-    imagesAddress+"Tiles/wall6.png",
-    imagesAddress+"Tiles/wall7.png",
-
-    imagesAddress+"Tiles/grass0.png",
-    imagesAddress+"Tiles/grass1.png",
-    imagesAddress+"Tiles/grass2.png",
-    imagesAddress+"Tiles/grass3.png",
-
-    imagesAddress+"Tiles/grass4.png",
-    imagesAddress+"Tiles/grass5.png",
-    imagesAddress+"Tiles/grass6.png",
-    imagesAddress+"Tiles/grass7.png",
-
-    imagesAddress+"Tiles/grass8.png",
-    imagesAddress+"Tiles/grass9.png",
-    imagesAddress+"Tiles/grass10.png",
-    imagesAddress+"Tiles/grass11.png",
-
-    //-------------------------------
-
-    imagesAddress+"Tiles/dirt0.png",
-    imagesAddress+"Tiles/dirt1.png",
-    imagesAddress+"Tiles/dirt2.png",
-    imagesAddress+"Tiles/dirt3.png",
-
+    imagesAddress+"/Tiles1/stone-floor0.png",
+    imagesAddress+"/Tiles1/stone-ceiling0.png",
+    imagesAddress+"/Tiles1/stone-wall-left0.png",
+    imagesAddress+"/Tiles1/stone-wall-right0.png",
     
 
-    
+    imagesAddress+"/Tiles1/stone-edge-top-left0.png",
+    imagesAddress+"/Tiles1/stone-edge-top-right0.png",
+    imagesAddress+"/Tiles1/stone-edge-bottom-left0.png",
+    imagesAddress+"/Tiles1/stone-edge-bottom-right0.png",
+
+    imagesAddress+"/Tiles1/bee0.png",
+    imagesAddress+"/Tiles1/water0.png",
+    imagesAddress+"/Tiles1/fire0.png",
+    imagesAddress+"/Tiles1/ladder0.png",
+
+    imagesAddress+"/Tiles1/flower0.png",
+    imagesAddress+"/Tiles1/person0.png",
+    imagesAddress+"/Tiles1/door0.png",
+    imagesAddress+"/Tiles1/chest0.png",
+
+
+
+  
+
 };
 
 enum{
@@ -116,16 +91,16 @@ void Init(){
     mainGrid.Init(1000,750,25,20);
 
     editorWindow.Init("LevelEditor",800,600);
-    levelEditor.Init(800,600,8,8);
+    levelEditor.Init(800,600,7,7);
     SDL_SetRenderDrawBlendMode(editorWindow.renderer,
     SDL_BLENDMODE_BLEND);
-
+    
     SDL_Texture* tempTexture;
     int tempWidth;
     int tempHeight;
     LE::Image tempEditImage;
     GSWE::Image tempMainImage;
-    for (int i=0;i!=36;i++){
+    for (int i=0;i!=sizeof(imagesPath)/sizeof(imagesPath[i]);i++){
         tempTexture = loadTexture(editorWindow.renderer,
                         imagesPath[i].c_str(),
                         tempWidth,tempHeight);
@@ -144,7 +119,7 @@ void Init(){
 
     }
 
-    levelEditor.Load("level.data");
+    levelEditor.Load(saveToPath);
 }
 
 void FetchEvents(){
@@ -173,6 +148,14 @@ void FetchEvents(){
         {
             switch (event.key.keysym.sym)
             {
+                case SDLK_1:
+                SDL_RaiseWindow(mainWindow.window);
+                SDL_SetWindowInputFocus(mainWindow.window);
+                break;
+                case SDLK_2:
+                SDL_RaiseWindow(editorWindow.window);
+                SDL_SetWindowInputFocus(editorWindow.window);
+                break;
                 case SDLK_LSHIFT: if(shouldBypass)shouldBypass=false;break;
                 case SDLK_F1: mainGrid.showGrid=!mainGrid.showGrid;break;
                 case SDLK_ESCAPE: shouldRun=false; break;
@@ -189,6 +172,9 @@ void FetchEvents(){
             if (mainWindow.mouseFocus){
                 SDL_GetMouseState(&mouseX,&mouseY);
                 mainGrid.GetMouseGridPos(mouseX,mouseY);
+                SDL_SetWindowInputFocus(mainWindow.window);
+            }else if(editorWindow.mouseFocus){
+                SDL_SetWindowInputFocus(editorWindow.window);
             }
         }
         else if(event.type==SDL_MOUSEBUTTONDOWN)
@@ -267,10 +253,10 @@ void CheckEvents(){
         mainGrid.RelToGridRel();
     }
     if (heldKeys[RSHIFT]){
-        mainGrid.cameraZoom*=1.01;
+        mainGrid.cameraZoom*=1.05;
     }
     if (heldKeys[RCTRL]){
-        mainGrid.cameraZoom*=0.99;
+        mainGrid.cameraZoom*=0.95;
     }
 
     if (shouldCreate){
@@ -353,7 +339,7 @@ int main(){
         SDL_Delay(50);
         if (!shouldRun){
             myout("exiting...\n");
-            levelEditor.Save("level.data");
+            levelEditor.Save(saveToPath);
         }
     }
 

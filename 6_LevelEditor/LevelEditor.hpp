@@ -144,7 +144,8 @@ namespace LE{
         {
             totalLines ++;
             for (int i=0;i!=text.length();i++){
-                if (text[i]=='-'){
+                if (text[i]=='_'){
+                    // myout("tempString: ") myout(tempString) enter
                     if (counter==0){
                         index = std::stoi(tempString);
                     }else if(counter==1){
@@ -175,17 +176,23 @@ namespace LE{
     void LevelEditor::Save(std::string p_path)
     {
         std::ofstream outputFile(p_path);
-
+        
+        std::string lastString = "";
         std::string maskString = "";
+        
         for (int i=0;i!=GSWE::StaticTilesArray.size();i++){
+            lastString = maskString;
             maskString = std::to_string(GSWE::StaticTilesArray[i].imageIndex) +
-                        "-"+
+                        '_'+
                        std::to_string(GSWE::StaticTilesArray[i].pos.x) +
-                       "-"+
+                       "_"+
                        std::to_string(
                            GSWE::StaticTilesArray[i].pos.y);
 
+            
+            
             outputFile << (maskString+"\n");
+            
             maskString = "";
                        
         }
