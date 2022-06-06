@@ -33,6 +33,7 @@ SDL_Texture* loadTexture(SDL_Renderer* p_renderer,
 SDL_Event event;
 bool shouldRun = true;
 bool shouldCreate = false;
+bool shouldDestroy = false;
 MyWindow::Window editorWindow;
 MyWindow::Window mainWindow;
 LE::LevelEditor  levelEditor;
@@ -42,20 +43,59 @@ std::string imagesAddress =
 "/home/yolo/Workstation/Graphies/Tiles/Adventure-Game-Jam/";
 
 std::string imagesPath[] = {
-    imagesAddress+"Tiles/Dirt0.png",
-    imagesAddress+"Tiles/Dirt1.png",
-    imagesAddress+"Tiles/Dirt2.png",
-    imagesAddress+"Tiles/Dirt3.png",
+    imagesAddress+"Tiles/floor0.png",
+    imagesAddress+"Tiles/floor1.png",
+    imagesAddress+"Tiles/floor2.png",
+    imagesAddress+"Tiles/floor3.png",
 
-    imagesAddress+"Tiles/Water0.png",
-    imagesAddress+"Tiles/Water1.png",
-    imagesAddress+"Tiles/Water2.png",
-    imagesAddress+"Tiles/Water3.png",
+    imagesAddress+"Tiles/floor4.png",
+    imagesAddress+"Tiles/floor5.png",
+    imagesAddress+"Tiles/floor6.png",
+    imagesAddress+"Tiles/floor7.png",
 
-    imagesAddress+"Tiles/Grass0.png",
-    imagesAddress+"Tiles/Grass1.png",
-    imagesAddress+"Tiles/Grass2.png",
-    imagesAddress+"Tiles/Grass3.png",
+    imagesAddress+"Tiles/floor8.png",
+    imagesAddress+"Tiles/floor9.png",
+    imagesAddress+"Tiles/floor10.png",
+    imagesAddress+"Tiles/floor11.png",
+
+    imagesAddress+"Tiles/wall0.png",
+    imagesAddress+"Tiles/wall1.png",
+    imagesAddress+"Tiles/wall2.png",
+    imagesAddress+"Tiles/wall3.png",
+
+    //-----------------------------
+
+
+    imagesAddress+"Tiles/wall4.png",
+    imagesAddress+"Tiles/wall5.png",
+    imagesAddress+"Tiles/wall6.png",
+    imagesAddress+"Tiles/wall7.png",
+
+    imagesAddress+"Tiles/grass0.png",
+    imagesAddress+"Tiles/grass1.png",
+    imagesAddress+"Tiles/grass2.png",
+    imagesAddress+"Tiles/grass3.png",
+
+    imagesAddress+"Tiles/grass4.png",
+    imagesAddress+"Tiles/grass5.png",
+    imagesAddress+"Tiles/grass6.png",
+    imagesAddress+"Tiles/grass7.png",
+
+    imagesAddress+"Tiles/grass8.png",
+    imagesAddress+"Tiles/grass9.png",
+    imagesAddress+"Tiles/grass10.png",
+    imagesAddress+"Tiles/grass11.png",
+
+    //-------------------------------
+
+    imagesAddress+"Tiles/dirt0.png",
+    imagesAddress+"Tiles/dirt1.png",
+    imagesAddress+"Tiles/dirt2.png",
+    imagesAddress+"Tiles/dirt3.png",
+
+    
+
+    
 };
 
 enum{
@@ -75,7 +115,7 @@ void Init(){
     mainGrid.Init(1000,750,25,20);
 
     editorWindow.Init("LevelEditor",800,600);
-    levelEditor.Init(800,600);
+    levelEditor.Init(800,600,10,10);
     SDL_SetRenderDrawBlendMode(editorWindow.renderer,
     SDL_BLENDMODE_BLEND);
 
@@ -84,7 +124,7 @@ void Init(){
     int tempHeight;
     LE::Image tempEditImage;
     GSWE::Image tempMainImage;
-    for (int i=0;i!=12;i++){
+    for (int i=0;i!=36;i++){
         tempTexture = loadTexture(editorWindow.renderer,
                         imagesPath[i].c_str(),
                         tempWidth,tempHeight);
@@ -116,6 +156,7 @@ void FetchEvents(){
         {
             switch (event.key.keysym.sym)
             {
+                
                 case SDLK_UP: if(!heldKeys[UP]) heldKeys[UP]=true;break;
                 case SDLK_DOWN: if(!heldKeys[DOWN]) heldKeys[DOWN]=true;break;
                 case SDLK_RIGHT: if(!heldKeys[RIGHT]) heldKeys[RIGHT]=true;break;
@@ -128,6 +169,7 @@ void FetchEvents(){
         {
             switch (event.key.keysym.sym)
             {
+                case SDLK_F1: mainGrid.showGrid=!mainGrid.showGrid;break;
                 case SDLK_ESCAPE: shouldRun=false; break;
                 case SDLK_UP: if(heldKeys[UP]) heldKeys[UP]=0;break;
                 case SDLK_DOWN: if(heldKeys[DOWN]) heldKeys[DOWN]=0;break;
@@ -149,13 +191,23 @@ void FetchEvents(){
          switch (event.button.button)
             {
                 case SDL_BUTTON_LEFT:
-                SDL_GetMouseState(&mouseX,&mouseY);
-                if (mainWindow.mouseFocus){
-                    shouldCreate = true;
-                }else{
-                    shouldCreate = false;
-                }
-                break;
+                    SDL_GetMouseState(&mouseX,&mouseY);
+                    if (mainWindow.mouseFocus){
+                        shouldCreate = true;
+                    }else{
+                        shouldCreate = false;
+                    }
+                    break;
+                
+                case SDL_BUTTON_RIGHT:
+                    SDL_GetMouseState(&mouseX,&mouseY);
+                    if (mainWindow.mouseFocus){
+                        shouldDestroy = true;
+                    }else{
+                        shouldDestroy = false;
+                    }
+                    break;
+
             }   
         }
         else if(event.type==SDL_MOUSEBUTTONUP)
@@ -173,6 +225,12 @@ void FetchEvents(){
                     shouldCreate = false;
                 }
                 break;
+                
+                case SDL_BUTTON_RIGHT:
+                if (mainWindow.mouseFocus){
+                    shouldDestroy=false;
+                }
+                break;
             }
         }
     }
@@ -188,19 +246,19 @@ void CheckEvents(){
     }
 
     if (heldKeys[UP]){
-        mainGrid.cameraYRel+=10;
+        mainGrid.cameraYRel+=20;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[DOWN]){
-        mainGrid.cameraYRel-=10;
+        mainGrid.cameraYRel-=20;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[RIGHT]){
-        mainGrid.cameraXRel-=10;
+        mainGrid.cameraXRel-=20;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[LEFT]){
-        mainGrid.cameraXRel+=10;
+        mainGrid.cameraXRel+=20;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[RSHIFT]){
@@ -231,13 +289,33 @@ void CheckEvents(){
             out(" Inserted at : ")
             out(mainGrid.mouseGridX) space
             out(mainGrid.mouseGridY) enter 
-            
+
             GSWE::StaticTilesArray.push_back({
                 {mainGrid.mouseGridX,mainGrid.mouseGridY},
                 levelEditor.selected
             });            
         }
         
+    }else if(shouldDestroy){
+        for (int i=0;i!=GSWE::StaticTilesArray.size();i++)
+        {
+            if ((GSWE::StaticTilesArray[i].pos.x==mainGrid.mouseGridX) &&
+                (GSWE::StaticTilesArray[i].pos.y==mainGrid.mouseGridY))
+            {
+
+                out("Image number ")
+                out(GSWE::StaticTilesArray[i].imageIndex)
+                out(" Removed from : ")
+                out(GSWE::StaticTilesArray[i].pos.x) space 
+                out(GSWE::StaticTilesArray[i].pos.y)
+                enter
+
+                GSWE::StaticTilesArray.erase(GSWE::StaticTilesArray.begin()
+                                + i);
+                break;
+            }
+        }
+
     }
 
 

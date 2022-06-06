@@ -22,6 +22,8 @@ namespace LE{
     
     struct LevelEditor{
 
+        int maxXGrid=6;
+        int maxYGrid=6;
         int windowWidth;
         int windowHeight;
         int selected=0;
@@ -29,7 +31,7 @@ namespace LE{
         SDL_Color selectedColor   = {0,0,0,125};
         SDL_Color Black           = {0,0,0,255};
         LevelEditor();
-        void Init(int,int);
+        void Init(int,int,int,int);
         void Update(int,int);
         void Draw(SDL_Renderer*);
         void CheckClick(int,int);
@@ -43,8 +45,8 @@ namespace LE{
     void LevelEditor::CheckClick(int p_mouse_x,int p_mouse_y)
     {
         
-        float tempWidth = float(windowWidth)/6;
-        float tempHeight = float(windowHeight)/6;
+        float tempWidth = float(windowWidth)/maxXGrid;
+        float tempHeight = float(windowHeight)/maxYGrid;
 
         SDL_FRect maskRect = {0,0,tempWidth,tempHeight};
         
@@ -59,7 +61,7 @@ namespace LE{
             }
 
             maskRect.x+=maskRect.w;
-            if ((i+1)%6==0){
+            if ((i+1)%maxXGrid==0){
                 maskRect.y+=maskRect.h;
                 maskRect.x=0;
             }
@@ -67,10 +69,13 @@ namespace LE{
         }   
     }
 
-    void LevelEditor::Init(int p_window_width,int p_window_height)
+    void LevelEditor::Init(int p_window_width,int p_window_height
+                    ,int p_max_x_grid,int p_max_y_grid)
     {
         windowWidth = p_window_width;
         windowHeight = p_window_height;
+        maxXGrid = p_max_x_grid;
+        maxYGrid = p_max_y_grid;
     }
 
     void LevelEditor::Update(int p_window_width,int p_window_height)
@@ -98,8 +103,8 @@ namespace LE{
             Black.a
         );
         
-        float tempWidth = float(windowWidth)/6;
-        float tempHeight = float(windowHeight)/6;
+        float tempWidth = float(windowWidth)/maxXGrid;
+        float tempHeight = float(windowHeight)/maxYGrid;
 
         SDL_FRect maskRect = {0,0,tempWidth,tempHeight};
         
@@ -115,7 +120,7 @@ namespace LE{
                                 &maskRect);
             }
             maskRect.x+=maskRect.w;
-            if ((i+1)%6==0){
+            if ((i+1)%maxXGrid==0){
                 maskRect.y+=maskRect.h;
                 maskRect.x=0;
             }

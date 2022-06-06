@@ -62,8 +62,8 @@ namespace GSWE{
 
         public:
 
-        int mouseGridX=0;
-        int mouseGridY=0;
+        int mouseGridX;
+        int mouseGridY;
 
         int windowWidth;
         int windowHeight;
