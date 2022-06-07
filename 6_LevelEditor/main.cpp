@@ -40,7 +40,7 @@ MyWindow::Window editorWindow;
 MyWindow::Window mainWindow;
 LE::LevelEditor  levelEditor;
 GSWE::GridSystem mainGrid;
-
+bool mouseMove = false;
 std::string imagesAddress = 
 "/home/yolo/Workstation/Graphies/Tiles/Adventure-Game-Jam/";
 
@@ -58,19 +58,53 @@ std::string imagesPath[] = {
     imagesAddress+"/Tiles1/stone-edge-bottom-left0.png",
     imagesAddress+"/Tiles1/stone-edge-bottom-right0.png",
 
-    imagesAddress+"/Tiles1/bee0.png",
+    imagesAddress+"/Tiles1/bee0.png", //10
+
     imagesAddress+"/Tiles1/water0.png",
     imagesAddress+"/Tiles1/fire0.png",
     imagesAddress+"/Tiles1/ladder0.png",
 
     imagesAddress+"/Tiles1/flower0.png",
+    imagesAddress+"/Tiles1/flower1.png",
+    imagesAddress+"/Tiles1/flower2.png",
+    imagesAddress+"/Tiles1/flower3.png",
+
     imagesAddress+"/Tiles1/person0.png",
+    imagesAddress+"/Tiles1/person1.png",
+    imagesAddress+"/Tiles1/person2.png", //20
+
+    imagesAddress+"/Tiles1/person3.png",
+
     imagesAddress+"/Tiles1/door0.png",
+    imagesAddress+"/Tiles1/door1.png",
+    imagesAddress+"/Tiles1/door2.png",
+    imagesAddress+"/Tiles1/door3.png",
+
     imagesAddress+"/Tiles1/chest0.png",
+    imagesAddress+"/Tiles1/chest1.png",
+    imagesAddress+"/Tiles1/chest2.png",
+    imagesAddress+"/Tiles1/chest3.png",
 
+    imagesAddress+"/Tiles1/sign0.png", //30
 
+    imagesAddress+"/Tiles1/sign1.png",
+    imagesAddress+"/Tiles1/sign2.png",
+    imagesAddress+"/Tiles1/sign3.png",
+    
+    imagesAddress+"/Tiles1/lever0.png",
+    imagesAddress+"/Tiles1/lever1.png",
+    imagesAddress+"/Tiles1/lever2.png",
+    imagesAddress+"/Tiles1/lever3.png",
 
-  
+    imagesAddress+"/Tiles1/gate0.png",
+    imagesAddress+"/Tiles1/gate1.png",
+    imagesAddress+"/Tiles1/gate2.png",//40
+
+    imagesAddress+"/Tiles1/gate3.png", 
+    
+    imagesAddress+"/Tiles1/fish0.png", 
+    imagesAddress+"/Characters/hero.png",//43 
+     
 
 };
 
@@ -169,11 +203,14 @@ void FetchEvents(){
         }
         else if(event.type==SDL_MOUSEMOTION)
         {
+            
             if (mainWindow.mouseFocus){
                 SDL_GetMouseState(&mouseX,&mouseY);
                 mainGrid.GetMouseGridPos(mouseX,mouseY);
+           
                 SDL_SetWindowInputFocus(mainWindow.window);
             }else if(editorWindow.mouseFocus){
+                
                 SDL_SetWindowInputFocus(editorWindow.window);
             }
         }
@@ -190,6 +227,9 @@ void FetchEvents(){
                     }
                     break;
                 
+                case SDL_BUTTON_MIDDLE:
+                    mouseMove=true;;
+                    break;
                 case SDL_BUTTON_RIGHT:
                     SDL_GetMouseState(&mouseX,&mouseY);
                     if (mainWindow.mouseFocus){
@@ -205,6 +245,13 @@ void FetchEvents(){
         {
             switch (event.button.button)
             {
+                case SDL_BUTTON_MIDDLE:
+                    mouseMove=false;
+                    heldKeys[UP]=0;
+                    heldKeys[DOWN]=0;
+                    heldKeys[RIGHT]=0;
+                    heldKeys[LEFT]=0;  
+                    break;
                 case SDL_BUTTON_LEFT:
                 SDL_GetMouseState(&mouseX,&mouseY);
                 if (editorWindow.mouseFocus){
@@ -228,6 +275,42 @@ void FetchEvents(){
 }
 
 void CheckEvents(){
+    if (mouseMove){
+    if ((mouseX<mainWindow.width/15)){
+                        heldKeys[LEFT]=true;
+    }else{
+                        heldKeys[LEFT]=false;
+    }
+
+    if ((mouseY<mainWindow.height/15)){
+                        heldKeys[UP]=true;
+    }else{
+                        heldKeys[UP]=false;
+    }
+
+    if (mouseX>mainWindow.width-mainWindow.width/15-10
+                                    ){
+                        heldKeys[RIGHT]=true;
+    }else{
+                        heldKeys[RIGHT]=false;
+    }
+
+    if (mouseY>mainWindow.height-mainWindow.height/15-10
+                                    ){
+                        heldKeys[DOWN]=true;
+    }else{
+                        heldKeys[DOWN]=false;
+                    }
+    }                
+    
+    // if ((!mainWindow.mouseFocus)||!mouseMove){
+    //             heldKeys[UP]=0;
+    //             heldKeys[DOWN]=0;
+    //             heldKeys[RIGHT]=0;
+    //             heldKeys[LEFT]=0;    
+    // }
+
+
     if (editorWindow.isClosed || mainWindow.isClosed){shouldRun=false;}
     if (editorWindow.sizeChanged){
         levelEditor.Update(editorWindow.width,editorWindow.height);
