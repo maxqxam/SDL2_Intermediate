@@ -45,66 +45,60 @@ std::string imagesAddress =
 "/home/yolo/Workstation/Graphies/Tiles/Adventure-Game-Jam/";
 
 std::string imagesPath[] = {
-    imagesAddress+"/Tiles1/stone-mass0.png",
-
-    imagesAddress+"/Tiles1/stone-floor0.png",
-    imagesAddress+"/Tiles1/stone-ceiling0.png",
-    imagesAddress+"/Tiles1/stone-wall-left0.png",
-    imagesAddress+"/Tiles1/stone-wall-right0.png",
+    imagesAddress+"/Tiles1/stone-tbrl.png",
+    imagesAddress+"/Tiles1/stone-tbr.png",
+    imagesAddress+"/Tiles1/stone-tbl.png",
+    imagesAddress+"/Tiles1/stone-tb.png",
     
+    imagesAddress+"/Tiles1/stone-trl.png",
+    imagesAddress+"/Tiles1/stone-tr.png",
+    imagesAddress+"/Tiles1/stone-tl.png",
+    imagesAddress+"/Tiles1/stone-t.png",
+    
+    imagesAddress+"/Tiles1/stone-brl.png",
+    imagesAddress+"/Tiles1/stone-br.png",
+    imagesAddress+"/Tiles1/stone-bl.png",
+    imagesAddress+"/Tiles1/stone-b.png",
+    
+    imagesAddress+"/Tiles1/stone-rl.png",
+    imagesAddress+"/Tiles1/stone-r.png",
+    imagesAddress+"/Tiles1/stone-l.png",
+    imagesAddress+"/Tiles1/stone.png",
 
-    imagesAddress+"/Tiles1/stone-edge-top-left0.png",
-    imagesAddress+"/Tiles1/stone-edge-top-right0.png",
-    imagesAddress+"/Tiles1/stone-edge-bottom-left0.png",
-    imagesAddress+"/Tiles1/stone-edge-bottom-right0.png",
-
-    imagesAddress+"/Tiles1/bee0.png", //10
+    // 16
 
     imagesAddress+"/Tiles1/water0.png",
-    imagesAddress+"/Tiles1/fire0.png",
-    imagesAddress+"/Tiles1/ladder0.png",
-
     imagesAddress+"/Tiles1/flower0.png",
     imagesAddress+"/Tiles1/flower1.png",
     imagesAddress+"/Tiles1/flower2.png",
+
     imagesAddress+"/Tiles1/flower3.png",
-
-    imagesAddress+"/Tiles1/person0.png",
-    imagesAddress+"/Tiles1/person1.png",
-    imagesAddress+"/Tiles1/person2.png", //20
-
-    imagesAddress+"/Tiles1/person3.png",
-
-    imagesAddress+"/Tiles1/door0.png",
-    imagesAddress+"/Tiles1/door1.png",
-    imagesAddress+"/Tiles1/door2.png",
-    imagesAddress+"/Tiles1/door3.png",
-
-    imagesAddress+"/Tiles1/chest0.png",
-    imagesAddress+"/Tiles1/chest1.png",
-    imagesAddress+"/Tiles1/chest2.png",
-    imagesAddress+"/Tiles1/chest3.png",
-
-    imagesAddress+"/Tiles1/sign0.png", //30
-
+    imagesAddress+"/Tiles1/sign0.png",
     imagesAddress+"/Tiles1/sign1.png",
     imagesAddress+"/Tiles1/sign2.png",
+
     imagesAddress+"/Tiles1/sign3.png",
-    
-    imagesAddress+"/Tiles1/lever0.png",
-    imagesAddress+"/Tiles1/lever1.png",
-    imagesAddress+"/Tiles1/lever2.png",
-    imagesAddress+"/Tiles1/lever3.png",
-
+    imagesAddress+"/Tiles1/door0.png",
     imagesAddress+"/Tiles1/gate0.png",
-    imagesAddress+"/Tiles1/gate1.png",
-    imagesAddress+"/Tiles1/gate2.png",//40
+    imagesAddress+"/Tiles1/lever0.png",
 
-    imagesAddress+"/Tiles1/gate3.png", 
+    imagesAddress+"/Tiles1/ladder0.png",
+    imagesAddress+"/Tiles1/person0.png",
+    imagesAddress+"/Tiles1/person1.png",
+    imagesAddress+"/Tiles1/person2.png",
+
+    // 32
+
+    imagesAddress+"/Tiles1/person3.png", 
+    imagesAddress+"/Tiles1/fish0.png",
+    imagesAddress+"/Tiles1/bee0.png",
+    imagesAddress+"/Characters/hero.png",
+
+    imagesAddress+"/Tiles1/fire0.png",
+    imagesAddress+"/Tiles1/chest0.png",
+    // imagesAddress+"/Tiles1/trapdoor0.png"
     
-    imagesAddress+"/Tiles1/fish0.png", 
-    imagesAddress+"/Characters/hero.png",//43 
-     
+    //37
 
 };
 
