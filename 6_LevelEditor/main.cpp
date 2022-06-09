@@ -6,7 +6,7 @@
 #include "MyWindow.hpp"
 #include "LevelEditor.hpp"
 
-std::string saveToPath = "./data/level.data";
+std::string saveToPath = "./data/level.map";
 SDL_Texture* loadTexture(SDL_Renderer* p_renderer,
                 std::string path,int &p_width,
                                  int &p_height){
@@ -42,7 +42,7 @@ LE::LevelEditor  levelEditor;
 GSWE::GridSystem mainGrid;
 bool mouseMove = false;
 std::string imagesAddress = 
-"/home/yolo/Workstation/Graphies/Tiles/Adventure-Game-Jam/";
+"./Adventure-Game-Jam/";
 
 std::string imagesPath[] = {
     imagesAddress+"/Tiles1/stone-tbrl.png",
@@ -314,19 +314,19 @@ void CheckEvents(){
     }
 
     if (heldKeys[UP]){
-        mainGrid.cameraYRel+=20;
+        mainGrid.cameraYRel+=50;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[DOWN]){
-        mainGrid.cameraYRel-=20;
+        mainGrid.cameraYRel-=50;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[RIGHT]){
-        mainGrid.cameraXRel-=20;
+        mainGrid.cameraXRel-=50;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[LEFT]){
-        mainGrid.cameraXRel+=20;
+        mainGrid.cameraXRel+=50;
         mainGrid.RelToGridRel();
     }
     if (heldKeys[RSHIFT]){
